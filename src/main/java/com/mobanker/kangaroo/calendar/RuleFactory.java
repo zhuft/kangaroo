@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-
 public class RuleFactory {
 
     public static Rule createRule(Event calendar){

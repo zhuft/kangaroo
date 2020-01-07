@@ -1,51 +1,41 @@
 package com.mobanker.kangaroo.calendar.impl;
 
 import com.mobanker.kangaroo.calendar.Event;
-import com.mobanker.kangaroo.calendar.utils.DateTimeUtils;
-import com.mobanker.kangaroo.calendar.utils.RuleConst;
+import com.mobanker.kangaroo.calendar.redis.CacheKeys;
+import com.mobanker.kangaroo.calendar.redis.JRedisClientFactory;
+
 import java.util.Date;
 
-public abstract class AbstractYearlyRule extends AbstractRecurRule{
 
-private AbstractMutliCalendarRuleHelper ruleHelper = new GregorianCalenarRuleHelper() ;
-    
+public abstract class AbstractYearlyRule extends AbstractRecurRule {
+
+    protected AbstractMutliCalendarRuleHelper ruleHelper = new GregorianCalenarRuleHelper();
+
     public AbstractYearlyRule(Event calendar) {
         super(calendar);
     }
-    
+
     public AbstractYearlyRule(Event calendar, AbstractMutliCalendarRuleHelper ruleHelper) {
         super(calendar);
         this.ruleHelper = ruleHelper;
     }
 
+
     @Override
-    public Date computeNextOccurDate(Date offsetDate) {
-        return computeNextOccurDateHelper(offsetDate, 1);
-    }
+    public void loadOneCycleCache() {
+        Date day = ruleHelper.computeNextOccurMonthDay(this, curDay);
 
-    private Date computeNextOccurDateHelper(Date offsetDate, int retry) {
-        if (retry > RuleConst.MAX_RETRY) {
-            return null;
-        }
-        
-        Date nextOccurMonthFirst = getNextYearMonthFirst(offsetDate);
-        Date nextOccurDate = ruleHelper.computeNextOccurMonthDay(this, nextOccurMonthFirst);
+        // 下一个周期
+        curDay = getNextIntervalYearFirst(curDay, getInterval());
 
-        boolean isRetry =
-            (nextOccurDate == null) || (DateTimeUtils.compareTo(nextOccurDate, offsetDate) < 0)
-                    || (DateTimeUtils.compareTo(nextOccurDate, offsetDate) == 0 && retry == 1);
-
-        if (isRetry) {
-            nextOccurDate =
-                    computeNextOccurDateHelper(DateTimeUtils.clearTime(getNextYearFirst(offsetDate)), ++retry);
+        if (day != null) {
+            JRedisClientFactory.getJRedisClient().zadd(CacheKeys.getRecurEventKey(event),
+                    day.getTime(), String.valueOf(day.getTime()));
+            times++;
         }
 
-        return nextOccurDate;
-        
     }
-    
-    protected abstract Date getNextYearFirst(Date theDay);
-    
-    protected abstract Date getNextYearMonthFirst(Date theDay);
-    
+
+    protected abstract Date getNextIntervalYearFirst(Date theDay, int years);
+
 }

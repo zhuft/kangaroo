@@ -28,9 +28,4 @@ public class OnceTimeRule extends AbstractRule {
         }
     }
 
-    @Override
-    public Date getRecurEndDate() {
-        return getStartDateTime();
-    }
-
 }

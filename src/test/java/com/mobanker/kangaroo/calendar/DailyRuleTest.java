@@ -10,20 +10,20 @@ public class DailyRuleTest extends Assert {
     @Test
     public void testDailyRuleCase1() {
         Event calendar = new Event();
-        calendar.setStartDate(DateTimeUtils.parseDate("2013-06-21 09:30:00"));
-        calendar.setRule("DAILY;UNTIL=20140101T000000Z;INTERVAL=3");
+        calendar.setStartDate(DateTimeUtils.parseDate("2020-01-07 10:30:00"));
+        calendar.setRule("DAILY;UNTIL=20200110T000000Z;INTERVAL=3");
 
         Rule rule = RuleFactory.createRule(calendar);
 
         // 在事件最开始之前
         assertTrue(DateTimeUtils.compareTo(rule
-                .nextOccurDate(DateTimeUtils.parseDate("2013-05-29")), DateTimeUtils
-                .parseDate("2013-6-21 09:30:00")) == 0);
+                .nextOccurDate(DateTimeUtils.parseDate("2020-01-01")), DateTimeUtils
+                .parseDate("2020-01-07 10:30:00")) == 0);
         // 在中间的任何一个周期上
         assertTrue(DateTimeUtils.compareTo(rule.nextOccurDate(DateTimeUtils
-                .parseDate("2013-7-1 12:36:00")), DateTimeUtils.parseDate("2013-7-3 09:30:00")) == 0);
+                .parseDate("2020-01-07 12:36:00")), DateTimeUtils.parseDate("2020-1-8 09:30:00")) == 0);
         // 超过until日期
-        assertEquals(rule.nextOccurDate(DateTimeUtils.parseDate("2013-12-31 12:36:00")), null);
+        assertEquals(rule.nextOccurDate(DateTimeUtils.parseDate("2020-01-31 00:00:00")), null);
     }
 
     @Test
